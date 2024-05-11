@@ -7,7 +7,8 @@ import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { HtmlToTextTransformer } from "@langchain/community/document_transformers/html_to_text";
 
-const questions = ["Who is this guy?", "In which institution he studied?", "tell me about his experience?", "Give me summary."];
+const PAGE_URL = "https://portfolio-n4sn.vercel.app/"
+const questions = ["Who is this guy?", "Where did he study from?", "Where did he work?", "What are candidate skills?"];
 
 // Instantiating Ollama
 const MODEL = "llama3";
@@ -26,9 +27,12 @@ const chain = promptTemplate.pipe(ollama);
 
 
 // Parsing HTML to text and splitting page into chunks
-const loader = new CheerioWebBaseLoader("https://akshaygugnani.github.io/#page-top");
+const loader = new CheerioWebBaseLoader(PAGE_URL);
 const docs = await loader.load();
-const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
+const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
+    chunkSize: 1500,
+    chunkOverlap: 100,
+});
 const transformer = new HtmlToTextTransformer();
 const sequence = splitter.pipe(transformer);
 const allSplits = await sequence.invoke(docs);
@@ -45,13 +49,11 @@ const retriever = vectorStore.asRetriever()
 
 const callOllama = async (detail, question) => {
     console.log(`Answer:`);
-    const start = performance.now();
     const stream = await chain.stream({ detail, question });
     for await (const chunk of stream) {
         process.stdout.write(chunk);
     }
-    const end = performance.now();
-    console.log(`\n\n${MODEL} took: ${end - start} ms \n\n`);
+    console.log(`\n\n`);
 }
 
 // Getting required details from web page using embeddings according to questions and calling Ollama
