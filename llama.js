@@ -7,8 +7,7 @@ import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { HtmlToTextTransformer } from "@langchain/community/document_transformers/html_to_text";
 
-const PAGE_URL = "https://portfolio-n4sn.vercel.app/"
-const questions = ["Who is this guy?", "Where did he study from?", "Where did he work?", "What are candidate skills?"];
+const PAGE_URL = "https://akshaygugnani.github.io/#page-top"
 
 // Instantiating Ollama
 const MODEL = "llama3";
@@ -57,6 +56,7 @@ const callOllama = async (detail, question) => {
 }
 
 // Getting required details from web page using embeddings according to questions and calling Ollama
+const questions = ["Who is this guy?", "Where did he study from?", "Where did he work?", "What are candidate skills?"];
 for (const question of questions) {
     console.log(`Question: ${question} \n`);
     const details = await retriever.invoke(question);
